@@ -487,7 +487,7 @@ export default function AnalyticsPage() {
             <ShoppingBag className="text-orange-600" size={24} />
 
             <h2 className="text-2xl font-bold text-gray-900">
-              Top Selling Items
+              Top 5 Selling Items
             </h2>
           </div>
 
@@ -528,7 +528,7 @@ export default function AnalyticsPage() {
                           </p>
 
                           <p className="text-xs text-gray-500">
-                            Top 5 selling item
+                            Top selling item
                           </p>
                         </div>
                       </div>
