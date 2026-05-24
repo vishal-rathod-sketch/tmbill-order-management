@@ -43,7 +43,7 @@ export const createOrderRouter = (io: any) => {
     }
   });
 
-  // GET /orders/:id
+  // GET /orders/:id/
   router.get("/:id", async (req: Request, res: Response) => {
     try {
       const order = await orderService.getOrderById(
