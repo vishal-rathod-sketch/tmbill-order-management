@@ -21,7 +21,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'OrderFlow',
+  title: 'TMBill',
   description:
     'Modern Order Management System',
 };
