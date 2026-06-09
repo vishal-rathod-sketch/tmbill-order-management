@@ -1,327 +1,421 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
 
-import { motion } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
+
+import {
+  motion,
+  AnimatePresence,
+} from 'framer-motion';
 
 import {
   ShoppingBag,
-  Truck,
+  Store,
+  IndianRupee,
   Clock3,
-  Star,
-  ArrowRight,
-  ChefHat,
+  Search,
+  ChevronLeft,
+  ChevronRight,
   PackageCheck,
+  ChefHat,
+  Activity,
 } from 'lucide-react';
 
-const features = [
-  {
-    title: 'Fast Order Tracking',
-    description:
-      'Track food orders in real-time with instant updates.',
-    icon: Truck,
-  },
+import { api } from '@/lib/api';
+import { useSocket } from '@/hooks/useSocket';
 
+const STATUS_CONFIG: Record<
+  string,
   {
-    title: 'Live Status Updates',
-    description:
-      'Monitor orders from placed to delivered smoothly.',
+    color: string;
+    icon: any;
+  }
+> = {
+  PLACED: {
+    color:
+      'bg-yellow-50 text-yellow-700 border-yellow-200',
     icon: Clock3,
   },
 
-  {
-    title: 'Smart Dashboard',
-    description:
-      'Beautiful modern dashboard for managing all orders.',
+  PREPARING: {
+    color:
+      'bg-blue-50 text-blue-700 border-blue-200',
+    icon: ChefHat,
+  },
+
+  COMPLETED: {
+    color:
+      'bg-green-50 text-green-700 border-green-200',
     icon: PackageCheck,
   },
-];
+};
 
-export default function Home() {
+export default function OrdersPage() {
+  const [storeId, setStoreId] = useState('');
+  const [page, setPage] = useState(1);
+
+  useSocket(storeId || undefined);
+
+  const { data, isLoading } = useQuery({
+    queryKey: ['orders', storeId, page],
+
+    queryFn: async () => {
+      const res = await api.get('/orders', {
+        params: {
+          store_id: storeId || undefined,
+          page,
+          limit: 10,
+        },
+      });
+
+      console.log('API RESPONSE:', res.data);
+
+      return res.data;
+    },
+  }); // ✅ FIX 1: Closed the useQuery({ ... }) call — was missing });
+
   return (
-    <main className="min-h-screen overflow-hidden bg-gradient-to-br from-orange-50 via-white to-red-50">
-      {/* Hero Section */}
-      <section className="relative mx-auto flex max-w-7xl flex-col items-center justify-between gap-14 px-6 py-20 lg:flex-row">
-        {/* Left Content */}
-        <motion.div
-          initial={{
-            opacity: 0,
-            x: -40,
-          }}
-          animate={{
-            opacity: 1,
-            x: 0,
-          }}
-          transition={{
-            duration: 0.6,
-          }}
-          className="max-w-2xl"
-        >
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-orange-200 bg-orange-100 px-4 py-2 text-sm font-semibold text-orange-700">
-            <Star size={16} />
-
-            Modern Food Ordering Experience
-          </div>
-
-          <h1 className="text-5xl font-black leading-tight tracking-tight text-gray-900 md:text-7xl">
-            Delicious Food,
-            <span className="block bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
-              Delivered Fast
-            </span>
-          </h1>
-
-          <p className="mt-6 max-w-xl text-lg leading-8 text-gray-600">
-            Manage food orders, monitor delivery
-            status, and track every order with a
-            beautiful modern dashboard experience.
-          </p>
-
-          {/* Buttons */}
-          <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-            <Link
-              href="/create-order"
-              className="group inline-flex items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-orange-500 to-red-500 px-8 py-4 text-base font-semibold text-white shadow-xl transition-all hover:scale-105"
-            >
-              Order Food
-
-              <ArrowRight
-                size={18}
-                className="transition-transform group-hover:translate-x-1"
+    <main className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 px-4 py-10">
+      <motion.div
+        initial={{
+          opacity: 0,
+          y: 30,
+        }}
+        animate={{
+          opacity: 1,
+          y: 0,
+        }}
+        className="mx-auto max-w-7xl"
+      >
+        {/* Header */}
+        <div className="mb-8 flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-4">
+            <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-blue-50 shadow-sm">
+              <ShoppingBag
+                className="text-blue-600"
+                size={30}
               />
-            </Link>
-
-            <Link
-              href="/orders"
-              className="inline-flex items-center justify-center gap-3 rounded-2xl border border-gray-200 bg-white px-8 py-4 text-base font-semibold text-gray-800 shadow-sm transition-all hover:border-orange-300 hover:bg-orange-50"
-            >
-              View Orders
-            </Link>
-          </div>
-
-          {/* Stats */}
-          <div className="mt-12 grid grid-cols-3 gap-6">
-            <div>
-              <h3 className="text-3xl font-bold text-gray-900">
-                10K+
-              </h3>
-
-              <p className="mt-1 text-sm text-gray-500">
-                Orders Delivered
-              </p>
             </div>
 
             <div>
-              <h3 className="text-3xl font-bold text-gray-900">
-                99%
-              </h3>
+              <h1 className="text-4xl font-bold tracking-tight text-gray-900">
+                Orders Dashboard
+              </h1>
 
               <p className="mt-1 text-sm text-gray-500">
-                Customer Satisfaction
-              </p>
-            </div>
-
-            <div>
-              <h3 className="text-3xl font-bold text-gray-900">
-                24/7
-              </h3>
-
-              <p className="mt-1 text-sm text-gray-500">
-                Live Tracking
+                Monitor and manage all orders in
+                real-time.
               </p>
             </div>
           </div>
-        </motion.div>
 
-        {/* Right Visual */}
-        <motion.div
-          initial={{
-            opacity: 0,
-            x: 40,
-          }}
-          animate={{
-            opacity: 1,
-            x: 0,
-          }}
-          transition={{
-            duration: 0.6,
-          }}
-          className="relative"
-        >
-          {/* Main Card */}
-          <div className="relative w-[350px] rounded-[40px] border border-white/50 bg-white/80 p-8 shadow-[0_20px_60px_rgba(0,0,0,0.1)] backdrop-blur-xl">
-            <div className="mb-6 flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">
-                  Current Order
-                </p>
+          <div className="flex items-center gap-2 rounded-2xl border border-green-200 bg-green-50 px-4 py-3">
+            <Activity
+              size={18}
+              className="animate-pulse text-green-600"
+            />
 
-                <h3 className="text-2xl font-bold text-gray-900">
-                  Burger Combo
-                </h3>
-              </div>
-
-              <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-orange-100">
-                <ChefHat
-                  className="text-orange-600"
-                  size={30}
-                />
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div className="rounded-2xl bg-gray-50 p-4">
-                <div className="mb-2 flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-600">
-                    Preparation
-                  </span>
-
-                  <span className="text-sm font-bold text-orange-600">
-                    75%
-                  </span>
-                </div>
-
-                <div className="h-3 overflow-hidden rounded-full bg-gray-200">
-                  <motion.div
-                    initial={{
-                      width: 0,
-                    }}
-                    animate={{
-                      width: '75%',
-                    }}
-                    transition={{
-                      duration: 1,
-                    }}
-                    className="h-full rounded-full bg-gradient-to-r from-orange-500 to-red-500"
-                  />
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-green-200 bg-green-50 p-4">
-                <div className="flex items-center gap-3">
-                  <Truck
-                    className="text-green-600"
-                    size={22}
-                  />
-
-                  <div>
-                    <p className="font-semibold text-green-800">
-                      Delivery On The Way
-                    </p>
-
-                    <p className="text-sm text-green-600">
-                      Estimated 15 mins
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between rounded-2xl bg-gray-900 px-5 py-4 text-white">
-                <div>
-                  <p className="text-sm text-gray-400">
-                    Total Price
-                  </p>
-
-                  <h4 className="text-2xl font-bold">
-                    ₹499
-                  </h4>
-                </div>
-
-                <ShoppingBag size={30} />
-              </div>
-            </div>
+            <span className="text-sm font-semibold text-green-700">
+              Live Updates Active
+            </span>
           </div>
-
-          {/* Floating Card */}
-          <motion.div
-            animate={{
-              y: [0, -10, 0],
-            }}
-            transition={{
-              duration: 3,
-              repeat: Infinity,
-            }}
-            className="absolute -bottom-8 -left-10 rounded-3xl border border-white/50 bg-white p-5 shadow-2xl"
-          >
-            <div className="flex items-center gap-3">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-red-100">
-                <PackageCheck
-                  className="text-red-500"
-                  size={24}
-                />
-              </div>
-
-              <div>
-                <h4 className="font-bold text-gray-900">
-                  245+
-                </h4>
-
-                <p className="text-sm text-gray-500">
-                  Active Orders
-                </p>
-              </div>
-            </div>
-          </motion.div>
-        </motion.div>
-      </section>
-
-      {/* Features */}
-      <section className="mx-auto max-w-7xl px-6 pb-20">
-        <div className="mb-14 text-center">
-          <h2 className="text-4xl font-bold text-gray-900">
-            Why Choose Us
-          </h2>
-
-          <p className="mt-4 text-gray-500">
-            Experience the smartest food ordering
-            platform.
-          </p>
         </div>
 
-        <div className="grid gap-8 md:grid-cols-3">
-          {features.map((feature, index) => {
-            const Icon = feature.icon;
+        {/* Filter Card */}
+        <motion.div
+          initial={{
+            opacity: 0,
+            y: 20,
+          }}
+          animate={{
+            opacity: 1,
+            y: 0,
+          }}
+          transition={{
+            delay: 0.1,
+          }}
+          className="mb-8 rounded-[30px] border border-gray-200 bg-white p-6 shadow-[0_10px_50px_rgba(0,0,0,0.06)]"
+        >
+          <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900">
+                Filter Orders
+              </h2>
 
-            return (
+              <p className="mt-1 text-sm text-gray-500">
+                Search orders by store ID.
+              </p>
+            </div>
+
+            <div className="relative w-full md:w-80">
+              <Search
+                size={18}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+              />
+
+              <input
+                className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-black placeholder:text-gray-400 outline-none transition-all focus:border-blue-500 focus:bg-white focus:shadow-lg"
+                placeholder="Enter Store ID"
+                value={storeId}
+                onChange={(e) => {
+                  setStoreId(e.target.value);
+                  setPage(1);
+                }}
+              />
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Loading */}
+        {isLoading && (
+          <div className="grid gap-5">
+            {[1, 2, 3, 4].map((item) => (
+              <div
+                key={item}
+                className="animate-pulse rounded-3xl border border-gray-200 bg-white p-6 shadow-sm"
+              >
+                <div className="mb-4 h-5 w-48 rounded bg-gray-200" />
+
+                <div className="grid gap-4 md:grid-cols-4">
+                  <div className="h-4 rounded bg-gray-100" />
+                  <div className="h-4 rounded bg-gray-100" />
+                  <div className="h-4 rounded bg-gray-100" />
+                  <div className="h-4 rounded bg-gray-100" />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Orders */}
+        {/* ✅ FIX 2: Added data?.data check to prevent "Cannot read properties of undefined" crash */}
+        {data && data.data && (
+          <>
+            <div className="grid gap-5">
+              <AnimatePresence>
+                {data.data.map(
+                  (order: any, index: number) => {
+                    const config =
+                      STATUS_CONFIG[
+                        order.status
+                      ];
+
+                    const StatusIcon =
+                      config?.icon || ShoppingBag;
+
+                    return (
+                      <motion.div
+                        key={order.id}
+                        initial={{
+                          opacity: 0,
+                          y: 20,
+                        }}
+                        animate={{
+                          opacity: 1,
+                          y: 0,
+                        }}
+                        exit={{
+                          opacity: 0,
+                        }}
+                        transition={{
+                          delay: index * 0.05,
+                        }}
+                        whileHover={{
+                          y: -3,
+                        }}
+                        className="group rounded-[30px] border border-gray-200 bg-white p-6 shadow-[0_8px_30px_rgba(0,0,0,0.05)] transition-all hover:shadow-[0_15px_40px_rgba(0,0,0,0.08)]"
+                      >
+                        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                          {/* Left */}
+                          <div className="grid flex-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                            <div>
+                              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                                Order ID
+                              </p>
+
+                              <p className="font-mono text-sm font-semibold text-gray-900">
+                                {order.id.slice(
+                                  0,
+                                  12
+                                )}
+                                ...
+                              </p>
+                            </div>
+
+                            <div>
+                              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                                Store
+                              </p>
+
+                              <div className="flex items-center gap-2">
+                                <Store
+                                  size={16}
+                                  className="text-gray-400"
+                                />
+
+                                <p className="font-semibold text-gray-900">
+                                  {
+                                    order.store_id
+                                  }
+                                </p>
+                              </div>
+                            </div>
+
+                            <div>
+                              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                                Amount
+                              </p>
+
+                              <div className="flex items-center gap-1">
+                                <IndianRupee
+                                  size={16}
+                                  className="text-gray-400"
+                                />
+
+                                <p className="font-semibold text-gray-900">
+                                  {
+                                    order.total_amount
+                                  }
+                                </p>
+                              </div>
+                            </div>
+
+                            <div>
+                              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                                Created
+                              </p>
+
+                              <p className="text-sm font-medium text-gray-600">
+                                {new Date(
+                                  order.created_at
+                                ).toLocaleString()}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Right */}
+                          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                            <div
+                              className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold ${config?.color}`}
+                            >
+                              <StatusIcon
+                                size={16}
+                              />
+
+                              {order.status}
+                            </div>
+
+                            <Link
+                              href={`/orders/${encodeURIComponent(String(order.id))}`}
+                              className="rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:scale-105"
+                            >
+                              View Details
+                            </Link>
+                          </div>
+                        </div>
+                      </motion.div>
+                    );
+                  }
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Empty State */}
+            {data.data.length === 0 && (
               <motion.div
-                key={feature.title}
                 initial={{
                   opacity: 0,
-                  y: 20,
                 }}
-                whileInView={{
+                animate={{
                   opacity: 1,
-                  y: 0,
                 }}
-                transition={{
-                  delay: index * 0.1,
-                }}
-                viewport={{
-                  once: true,
-                }}
-                whileHover={{
-                  y: -5,
-                }}
-                className="rounded-[32px] border border-gray-200 bg-white p-8 shadow-[0_10px_40px_rgba(0,0,0,0.05)] transition-all hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)]"
+                className="rounded-[32px] border border-dashed border-gray-300 bg-white px-8 py-20 text-center shadow-sm"
               >
-                <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-3xl bg-orange-100">
-                  <Icon
-                    className="text-orange-600"
-                    size={28}
-                  />
-                </div>
+                <ShoppingBag
+                  className="mx-auto mb-4 text-gray-300"
+                  size={60}
+                />
 
-                <h3 className="text-2xl font-bold text-gray-900">
-                  {feature.title}
+                <h3 className="text-2xl font-bold text-gray-800">
+                  No Orders Found
                 </h3>
 
-                <p className="mt-4 leading-7 text-gray-600">
-                  {feature.description}
+                <p className="mt-2 text-gray-500">
+                  Try changing the store filter
+                  or create a new order.
                 </p>
               </motion.div>
-            );
-          })}
-        </div>
-      </section>
+            )}
+
+            {/* Pagination */}
+            <motion.div
+              initial={{
+                opacity: 0,
+                y: 20,
+              }}
+              animate={{
+                opacity: 1,
+                y: 0,
+              }}
+              className="mt-8 flex flex-col gap-4 rounded-[28px] border border-gray-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between"
+            >
+              <div>
+                <p className="text-sm font-medium text-gray-500">
+                  Showing page{' '}
+                  <span className="font-bold text-gray-900">
+                    {page}
+                  </span>{' '}
+                  · Total Orders:{' '}
+                  <span className="font-bold text-gray-900">
+                    {data.pagination?.total ?? 0}
+                  </span>
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <motion.button
+                  whileHover={{
+                    scale: 1.03,
+                  }}
+                  whileTap={{
+                    scale: 0.97,
+                  }}
+                  disabled={page === 1}
+                  onClick={() =>
+                    setPage((p) => p - 1)
+                  }
+                  className="flex items-center gap-2 rounded-2xl border border-gray-200 bg-white px-5 py-3 font-medium text-gray-700 transition-all hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <ChevronLeft size={18} />
+                  Prev
+                </motion.button>
+
+                <motion.button
+                  whileHover={{
+                    scale: 1.03,
+                  }}
+                  whileTap={{
+                    scale: 0.97,
+                  }}
+                  disabled={
+                    page * 10 >=
+                    (data.pagination?.total ?? 0)
+                  }
+                  onClick={() =>
+                    setPage((p) => p + 1)
+                  }
+                  className="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-3 font-medium text-white shadow-lg transition-all disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Next
+                  <ChevronRight size={18} />
+                </motion.button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </motion.div>
     </main>
   );
 }

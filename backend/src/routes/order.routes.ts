@@ -63,7 +63,9 @@ export const createOrderRouter = (io: any) => {
       return res.status(400).json({ error: parsed.error.flatten() });
     }
     try {
-      const order = await orderService.updateOrderStatus(
+      const order = await orderService.
+      
+      updateOrderStatus(
         req.params.id as string,
         parsed.data.status,
       );
